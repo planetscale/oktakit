@@ -183,7 +183,6 @@ module Oktakit
       end
 
       uri = URI::DEFAULT_PARSER.escape(api_base_path + path.to_s)
-      puts uri
       @last_response = resp = sawyer_agent.call(method, uri, data, options)
 
       response = [resp.data, resp.status]
