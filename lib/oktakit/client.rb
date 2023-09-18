@@ -10,6 +10,7 @@ require 'oktakit/client/identity_providers'
 require 'oktakit/client/schemas'
 require 'oktakit/client/templates'
 require 'oktakit/client/users'
+require 'oktakit/client/identity_governance'
 
 module Oktakit
   class Client
@@ -23,6 +24,7 @@ module Oktakit
     include Schemas
     include Templates
     include Users
+    include IdentityGovernance
 
     # Default Faraday middleware stack
     MIDDLEWARE = Faraday::RackBuilder.new do |builder|
@@ -66,6 +68,7 @@ module Oktakit
         headers: options.delete(:headers),
         accept: options.delete(:accept),
         content_type: options.delete(:content_type),
+        base_path: options.delete(:base_path),
         paginate: should_paginate,
         data: options,
       }
@@ -99,7 +102,7 @@ module Oktakit
     def post(url, options = {})
       request(:post, url, query: options.delete(:query), headers: options.delete(:headers),
                           accept: options.delete(:accept), content_type: options.delete(:content_type),
-                          data: options)
+                          base_path: options.delete(:base_path), data: options)
     end
 
     # Make a HTTP PUT request
@@ -114,7 +117,7 @@ module Oktakit
     def put(url, options = {})
       request(:put, url, query: options.delete(:query), headers: options.delete(:headers),
                          accept: options.delete(:accept), content_type: options.delete(:content_type),
-                         data: options)
+                         base_path: options.delete(:base_path), data: options)
     end
 
     # Make a HTTP PATCH request
@@ -129,7 +132,7 @@ module Oktakit
     def patch(url, options = {})
       request(:patch, url, query: options.delete(:query), headers: options.delete(:headers),
                            accept: options.delete(:accept), content_type: options.delete(:content_type),
-                           data: options)
+                           base_path: options.delete(:base_path), data: options)
     end
 
     # Make a HTTP DELETE request
@@ -144,7 +147,7 @@ module Oktakit
     def delete(url, options = {})
       request(:delete, url, query: options.delete(:query), headers: options.delete(:headers),
                             accept: options.delete(:accept), content_type: options.delete(:content_type),
-                            data: options)
+                            base_path: options.delete(:base_path), data: options)
     end
 
     # Make a HTTP HEAD request
@@ -159,21 +162,28 @@ module Oktakit
     def head(url, options = {})
       request(:head, url, query: options.delete(:query), headers: options.delete(:headers),
                           accept: options.delete(:accept), content_type: options.delete(:content_type),
-                          data: options)
+                          base_path: options.delete(:base_path), data: options)
     end
 
     attr_reader :last_response
 
     private
 
-    def request(method, path, data:, query:, headers:, accept:, content_type:, paginate: false)
+    def request(method, path, data:, query:, headers:, accept:, content_type:, paginate: false, base_path:)
       options = {}
       options[:query] = query || {}
       options[:headers] = headers || {}
       options[:headers][:accept] = accept if accept
       options[:headers][:content_type] = content_type if content_type
 
-      uri = URI::DEFAULT_PARSER.escape("/api/v1" + path.to_s)
+      api_base_path = if base_path
+        base_path
+      else
+        "/api/v1"
+      end
+
+      uri = URI::DEFAULT_PARSER.escape(api_base_path + path.to_s)
+      puts uri
       @last_response = resp = sawyer_agent.call(method, uri, data, options)
 
       response = [resp.data, resp.status]
