@@ -3,6 +3,14 @@ module Oktakit
     module IdentityGovernance
       BASE_PATH = "/governance/api/v1"
 
+      def list_access_request_types(options = {})
+        get("/request-types", options.merge(base_path: BASE_PATH))
+      end
+
+      def get_access_request_type(id, options = {})
+        get("/request-types/#{id}", options.merge(base_path: BASE_PATH))
+      end
+
       def get_access_request(id, options = {})
         get("/requests/#{id}", options.merge(base_path: BASE_PATH))
       end

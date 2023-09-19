@@ -32,6 +32,8 @@ module Oktakit
       builder.adapter(:net_http)
     end
 
+    Faraday::Utils.default_space_encoding = '%20'
+
     def initialize(token: nil, access_token: nil, organization: nil, api_endpoint: nil)
       if organization.nil? && api_endpoint.nil?
         raise ArgumentError, "Please provide either the organization or the api_endpoint argument"
